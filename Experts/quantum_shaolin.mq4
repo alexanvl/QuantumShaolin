@@ -130,34 +130,42 @@ void checkCloseTrades()
          while (trades > 0)
          {          
             int tradeList[][2];  
-            int size = 1;
+            int size = 0;
+            
             for(int h = OrdersTotal()-1; h >= 0; h--)
             {
                if(!OrderSelect(h,SELECT_BY_POS,MODE_TRADES))
                   continue;
                if(OrderSymbol() == Symbol() && OrderMagicNumber() == magic_num)
                {
+                  size++;
                   ArrayResize(tradeList, size);
                   tradeList[size-1][0]=OrderOpenTime();
                   tradeList[size-1][1]=OrderTicket();
-                  size++;
                }
             }
             
-            ArraySort(tradeList);
-            
-            for(int i=0; i < size; i++)
+            if (size > 0)
             {
-               if (!OrderSelect(tradeList[i][1],SELECT_BY_TICKET))
-                  continue;
-               if(OrderClose(OrderTicket(),OrderLots(),OrderClosePrice(),0,0))
+               ArraySort(tradeList);
+               
+               for(int i=0; i < size; i++)
                {
-                  trades--;
+                  if (!OrderSelect(tradeList[i][1],SELECT_BY_TICKET))
+                     continue;
+                  if(OrderClose(OrderTicket(),OrderLots(),OrderClosePrice(),0,0))
+                  {
+                     trades--;
+                  }
+                  else
+                  {
+                     Print("OrderClose Error: ",GetLastError());
+                  }
                }
-               else
-               {
-                  Print("OrderClose Error: ",GetLastError());
-               }
+            }
+            else
+            {
+               trades = 0;
             }
          }
          cycles++;
