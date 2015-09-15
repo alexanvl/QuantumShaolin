@@ -24,6 +24,7 @@ int trades = 0;
 int trade_side = -1;
 datetime day_curr;
 datetime day_prev; 
+int bars = Bars;
 
 int init()
 {
@@ -40,6 +41,8 @@ int start()
    datetime currTime = TimeGMT();
    datetime time_open = StrToTime(time_open_str);
    datetime time_close = StrToTime(time_close_str);
+   bool barNext = false;
+   
    day_curr=iTime(Symbol(),PERIOD_D1,0);
 
    if(day_curr > day_prev)
@@ -49,8 +52,13 @@ int start()
    }
 
    checkCloseTrades();
+   
+   if (Bars > bars) {
+      bars = Bars;
+      barNext = true;
+   }
 
-   if ((cycles < max_cycles || max_cycles == 0) && (trades < max_trades || max_trades == 0) && currTime >= time_open && currTime < time_close && Volume[0] <= 1)
+   if ((cycles < max_cycles || max_cycles == 0) && (trades < max_trades || max_trades == 0) && currTime >= time_open && currTime < time_close && barNext)
    {
       int nextTicket = -1;
       bool trade = false;
