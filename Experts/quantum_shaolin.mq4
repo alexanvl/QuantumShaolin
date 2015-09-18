@@ -2,12 +2,12 @@
 //|                                                  Shaolin Quantum |
 //|                                      Copyright 2015, Alex Lewis  |
 //+------------------------------------------------------------------+ 
-
+#property strict
 input int magic_num=2015; //Magic Number
 input string time_open_str="07:00"; // Trading Window Start Time (GMT)
 input string time_close_str="13:00"; // Trading Window End Time (GMT)
-input int max_trades=0;//Max Trades per Trading Slot
-input int max_cycles=0;//Max Cycles per Trading Slot
+input int max_trades=0;//Max Trades per Trading Slot (0 unlimited)
+input int max_cycles=0;//Max Cycles per Trading Slot (0 unlimited)
 input int qde=325;//Quantum eintDepth3 for Entry
 input int qdc=325;//Quantum eintDepth3 for Close
 input int slip=50;//Order Slippage
@@ -17,7 +17,10 @@ input double lots3=0.05; //Lots Trades 22-29
 input double lots4=0.13; //Lots Trades 30-36
 input double lots5=0.34; //Lots Trades 37-39
 input double lots6=0.89; //Lots Trade 40 & >
-input double sl_pct=0;//% Equity Stop Loss (Eg. 10)
+input double sl_pct=0;//% Equity Stop Loss (positive number Eg 2.5)
+input double tp_pct=0;//% Equity Take Profit (positive number Eg 2.5)
+input double sl_dollar=0;//$ Equity Stop Loss (positive number Eg 100.00)
+input double tp_dollar=0;//$ Equity Take Profit (positive number Eg 100.00)
 
 int cycles = 0;
 int trades = 0;
@@ -123,10 +126,17 @@ void checkCloseTrades()
 
    if (trades > 0)
    {
-      if(sl_pct > 0 && AccountEquity() <= (AccountBalance() - (AccountBalance() * (sl_pct/100))))
+      if((sl_pct > 0 && AccountEquity() <= (AccountBalance() - (AccountBalance() * (sl_pct/100)))) ||
+         (sl_dollar > 0 && AccountEquity() <= (AccountBalance() - sl_dollar)))
       {
          close = true;
          Print("Stoploss Triggered");
+      }
+      else if((tp_pct > 0 && AccountEquity() >= (AccountBalance() + (AccountBalance() * (tp_pct/100)))) ||
+         (tp_dollar > 0 && AccountEquity() >= (AccountBalance() + tp_dollar)))
+      {
+         close = true;
+         Print("Take Profit Triggered");
       }
       else
       {
