@@ -4,23 +4,24 @@
 //+------------------------------------------------------------------+ 
 #property strict
 input int magic_num=2015; //Magic Number
-input string time_open_str="07:00"; // Trading Window Start Time (GMT)
-input string time_close_str="13:00"; // Trading Window End Time (GMT)
+input string time_open_str="00:00"; // Trading Window Start Time (GMT)
+input string time_close_str="08:00"; // Trading Window End Time (GMT)
 input int max_trades=0;//Max Trades per Trading Slot (0 unlimited)
-input int max_cycles=0;//Max Cycles per Trading Slot (0 unlimited)
-input int qde=325;//Quantum eintDepth3 for Entry
-input int qdc=325;//Quantum eintDepth3 for Close
-input int slip=50;//Order Slippage
+input int max_cycles=1;//Max Cycles per Trading Slot (0 unlimited)
+input int qde=240;//Quantum eintDepth3 for Entry
+input int qdc=240;//Quantum eintDepth3 for Close
+input int slip=10;//Order Slippage
 input double lots1=0.01; //Lots Trades 1-12
 input double lots2=0.02; //Lots Trades 13-21
-input double lots3=0.05; //Lots Trades 22-29
-input double lots4=0.13; //Lots Trades 30-36
-input double lots5=0.34; //Lots Trades 37-39
-input double lots6=0.89; //Lots Trade 40 & >
+input double lots3=0.03; //Lots Trades 22-29
+input double lots4=0.04; //Lots Trades 30-36
+input double lots5=0.05; //Lots Trades 37-39
+input double lots6=0.06; //Lots Trade 40 & >
 input double sl_pct=0;//% Equity Stop Loss (positive number Eg 2.5)
 input double tp_pct=0;//% Equity Take Profit (positive number Eg 2.5)
 input double sl_dollar=0;//$ Equity Stop Loss (positive number Eg 100.00)
 input double tp_dollar=0;//$ Equity Take Profit (positive number Eg 100.00)
+input int min_price_diff=50;//Minimum Points Between Trades (50 = 5 pips)
 
 int cycles = 0;
 int trades = 0;
@@ -28,6 +29,7 @@ int trade_side = -1;
 datetime day_curr;
 datetime day_prev; 
 int bars = Bars;
+double lastTradePrice = 0;
 
 int init()
 {
@@ -84,6 +86,15 @@ int start()
       //trade
       if (trade) 
       {
+         //check minimum dist
+         if (min_price_diff != 0) {
+            double diff = MathAbs(price - lastTradePrice);
+            if (diff < (min_price_diff*Point)) {
+               Print("Minimum Price Diff Not Met: ",diff);
+               return 0;
+            }
+         }
+         
          nextTicket = OrderSend(Symbol(), trade_side, getLots(), price, slip, 0, 0, "SHAOLIN", magic_num, 0, 0);
          
          if(nextTicket <= -1) 
@@ -92,6 +103,7 @@ int start()
          } 
          else 
          {
+            lastTradePrice = price;
             trades++;
          }
       }
@@ -188,6 +200,7 @@ void checkCloseTrades()
          }
          cycles++;
          trade_side = -1;
+         lastTradePrice = 0;
       }
    }
 }
