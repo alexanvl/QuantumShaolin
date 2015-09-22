@@ -46,6 +46,18 @@ int start()
    datetime currTime = TimeGMT();
    datetime time_open = StrToTime(time_open_str);
    datetime time_close = StrToTime(time_close_str);
+   MqlDateTime dtct, dto, dtc;
+   TimeToStruct(currTime, dtct);
+   TimeToStruct(time_open, dto);
+   TimeToStruct(time_close, dtc);
+   dto.year = dtc.year = dtct.year;
+   dto.mon = dtc.mon = dtct.mon;
+   dto.day = dtc.day = dtct.day;
+   time_open = StructToTime(dto);
+   time_close = StructToTime(dtc);
+   
+   Comment("currTime: "+currTime+"\ntime_open: "+time_open+"\ntime_close: "+time_close);
+   
    bool barNext = false;
    
    day_curr=iTime(Symbol(),PERIOD_D1,0);
