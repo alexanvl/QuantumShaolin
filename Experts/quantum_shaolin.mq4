@@ -12,15 +12,17 @@ input int qde=240;//Quantum eintDepth3 for Entry
 input int qdc=240;//Quantum eintDepth3 for Close
 input int slip=10;//Order Slippage
 input double lots1=0.01; //Lots Trades 1-12
-input double lots2=0.02; //Lots Trades 13-21
-input double lots3=0.03; //Lots Trades 22-29
-input double lots4=0.04; //Lots Trades 30-36
-input double lots5=0.05; //Lots Trades 37-39
-input double lots6=0.06; //Lots Trade 40 & >
-input double sl_pct=0;//% Equity Stop Loss (positive number Eg 2.5)
-input double tp_pct=0;//% Equity Take Profit (positive number Eg 2.5)
-input double sl_dollar=0;//$ Equity Stop Loss (positive number Eg 100.00)
-input double tp_dollar=0;//$ Equity Take Profit (positive number Eg 100.00)
+input double lots2=0.01; //Lots Trades 13-21
+input double lots3=0.01; //Lots Trades 22-29
+input double lots4=0.01; //Lots Trades 30-36
+input double lots5=0.01; //Lots Trades 37-39
+input double lots6=0.01; //Lots Trade 40 & >
+input double sl_pct=0;//% Equity Stop Loss For All Trades (positive number Eg 2.5)
+input double tp_pct=0;//% Equity Take Profit For All Trades (positive number Eg 2.5)
+input double sl_dollar=0;//$ Amount Stop Loss For All Trades (positive number Eg 100.00)
+input double tp_dollar=0;//$ Amount Take Profit For All Trades (positive number Eg 100.00)
+input int sl_points=0;// Stop Loss Points Per Trade
+input int tp_points=0;// Take Profit Points Per Trade
 input int min_price_diff=50;//Minimum Points Between Trades (50 = 5 pips)
 
 int cycles = 0;
@@ -80,12 +82,17 @@ int start()
       int nextTicket = -1;
       bool trade = false;
       double price = 0;
+      double tp = 0, sl = 0;
       //buy
       if (iCustom(Symbol(),0,"Quantum",qde,0,1) > 0 && (trade_side == -1 || trade_side == OP_BUY)) 
       {
          trade_side = OP_BUY;
          trade = true;
          price = Ask;
+         if (tp_points)
+            tp = price + (tp_points*Point);
+         if (sl_points)
+            sl = price - (sl_points*Point);
       }
       else
       //sell
@@ -94,6 +101,10 @@ int start()
          trade_side = OP_SELL;
          trade = true;
          price = Bid;
+         if (tp_points)
+            tp = price - (tp_points*Point);
+         if (sl_points)
+            sl = price + (sl_points*Point);
       }
       //trade
       if (trade) 
@@ -107,7 +118,7 @@ int start()
             }
          }
          
-         nextTicket = OrderSend(Symbol(), trade_side, getLots(), price, slip, 0, 0, "SHAOLIN", magic_num, 0, 0);
+         nextTicket = OrderSend(Symbol(), trade_side, getLots(), price, slip, sl, tp, "SHAOLIN", magic_num, 0, 0);
          
          if(nextTicket <= -1) 
          {
