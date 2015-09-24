@@ -3,11 +3,12 @@
 //|                                      Copyright 2015, Alex Lewis  |
 //+------------------------------------------------------------------+ 
 #property strict
+const string ver = "1.3.1";
 input int magic_num=2015; //Magic Number
 input string time_open_str="00:00"; // Trading Window Start Time (GMT)
 input string time_close_str="08:00"; // Trading Window End Time (GMT)
-input int max_trades=0;//Max Trades per Trading Slot (0 unlimited)
-input int max_cycles=1;//Max Cycles per Trading Slot (0 unlimited)
+input int max_trades=0;//Max Trades Per Trading Window (0 = unlimited)
+input int max_cycles=1;//Max Cycles Per Trading Window (0 = unlimited)
 input int qde=240;//Quantum eintDepth3 for Entry
 input int qdc=240;//Quantum eintDepth3 for Close
 input int slip=10;//Order Slippage
@@ -21,9 +22,9 @@ input double sl_pct=0;//% Equity Stop Loss For All Trades (positive number Eg 2.
 input double tp_pct=0;//% Equity Take Profit For All Trades (positive number Eg 2.5)
 input double sl_dollar=0;//$ Amount Stop Loss For All Trades (positive number Eg 100.00)
 input double tp_dollar=0;//$ Amount Take Profit For All Trades (positive number Eg 100.00)
-input int sl_points=0;// Stop Loss Points Per Trade
-input int tp_points=0;// Take Profit Points Per Trade
-input int min_price_diff=50;//Minimum Points Between Trades (50 = 5 pips)
+input int sl_points=0;// Stop Loss Points Per Trade (Eg 50 = 5 pips)
+input int tp_points=0;// Take Profit Points Per Trade (Eg 50 = 5 pips)
+input int min_price_diff=50;//Minimum Points Between Trades (Eg 50 = 5 pips)
 
 int cycles = 0;
 int trades = 0;
@@ -45,11 +46,11 @@ int deinit()
 
 int start()
 {
-   datetime currTime = TimeGMT();
+   datetime time_curr = TimeGMT();
    datetime time_open = StrToTime(time_open_str);
    datetime time_close = StrToTime(time_close_str);
    MqlDateTime dtct, dto, dtc;
-   TimeToStruct(currTime, dtct);
+   TimeToStruct(time_curr, dtct);
    TimeToStruct(time_open, dto);
    TimeToStruct(time_close, dtc);
    dto.year = dtc.year = dtct.year;
@@ -58,7 +59,7 @@ int start()
    time_open = StructToTime(dto);
    time_close = StructToTime(dtc);
    
-   Comment("currTime: "+currTime+"\ntime_open: "+time_open+"\ntime_close: "+time_close);
+   Comment("Shaolin Quantum v",ver);
    
    bool barNext = false;
    
@@ -77,7 +78,7 @@ int start()
       barNext = true;
    }
 
-   if ((cycles < max_cycles || max_cycles == 0) && (trades < max_trades || max_trades == 0) && currTime >= time_open && currTime < time_close && barNext)
+   if ((cycles < max_cycles || max_cycles == 0) && (trades < max_trades || max_trades == 0) && time_curr >= time_open && time_curr < time_close && barNext)
    {
       int nextTicket = -1;
       bool trade = false;
