@@ -12,6 +12,9 @@ Notes:
 
 CHANGE LOG:
 
+v1.3.2
+- Added support for start time > end time (next day wrap-around)
+
 v1.3.1
 - Added version comment
 

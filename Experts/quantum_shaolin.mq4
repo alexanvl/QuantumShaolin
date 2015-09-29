@@ -3,7 +3,7 @@
 //|                                      Copyright 2015, Alex Lewis  |
 //+------------------------------------------------------------------+ 
 #property strict
-const string ver = "1.3.1";
+const string ver = "1.3.2";
 input int magic_num=2015; //Magic Number
 input string time_open_str="00:00"; // Trading Window Start Time (GMT)
 input string time_close_str="08:00"; // Trading Window End Time (GMT)
@@ -59,7 +59,12 @@ int start()
    time_open = StructToTime(dto);
    time_close = StructToTime(dtc);
    
-   Comment("Shaolin Quantum v",ver);
+   if (time_open > time_close) {
+      //assume next day
+      time_close += 86400;
+   }
+   
+   Comment("Shaolin Quantum v",ver,"\nTime Open: ",time_open,"\nTime Close: ",time_close);
    
    bool barNext = false;
    
