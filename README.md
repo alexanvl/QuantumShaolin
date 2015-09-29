@@ -12,6 +12,9 @@ Notes:
 
 CHANGE LOG:
 
+v1.3.1
+- Added version comment
+
 v1.3.0
 - Added support for TP/SL per trade, in points
 
